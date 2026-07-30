@@ -1,0 +1,16 @@
+{
+  "nodes": [
+    {"id": "client", "label": "Client app", "shape": "round", "section": "Edge"},
+    {"id": "end", "label": "Gateway #1", "shape": "rect", "section": "Edge"},
+    {"id": "auth", "label": "Auth \"v2\"", "shape": "stadium", "section": "Services"},
+    {"id": "queue", "label": "Events\nqueue", "shape": "cylinder", "section": "Services"},
+    {"id": "decide", "label": "Cache hit?", "shape": "decision", "confidence": 0.4}
+  ],
+  "edges": [
+    {"source": "client", "target": "end", "label": "HTTPS"},
+    {"source": "end", "target": "auth", "label": "verify | token", "confidence": 0.95},
+    {"source": "auth", "target": "decide", "confidence": 0.35},
+    {"source": "decide", "target": "queue", "label": "miss", "needs_review": true},
+    {"source": "queue", "target": "worker", "directed": false}
+  ]
+}

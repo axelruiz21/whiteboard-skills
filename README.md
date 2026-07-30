@@ -1,38 +1,52 @@
-# Python Whiteboard Parser Skill
+# Whiteboard Skills for Cursor
 
-A public Cursor Agent Skill for designing local-first Python pipelines that extract whiteboard text and preserve lists, action items, tables, diagrams, coordinates, confidence, and review flags.
+A collection of [Cursor Agent Skills](https://cursor.com/docs) for getting structured, trustworthy data off physical whiteboards with local-first Python. Each skill is self-contained; install one or all of them.
+
+## Skills
+
+| Skill | What it does |
+|---|---|
+| [`python-whiteboard-parser`](.cursor/skills/python-whiteboard-parser/SKILL.md) | Extracts text, lists, action items, tables, and diagram structure from a whiteboard photo with OpenCV and Tesseract, preserving coordinates, confidence, and review flags |
+| [`board-change-tracker`](.cursor/skills/board-change-tracker/SKILL.md) | Diffs two or more photos of the same board and reports what was added, erased, moved, or edited, without mistaking a person standing in front of the board for an erasure |
+| [`diagram-to-mermaid`](.cursor/skills/diagram-to-mermaid/SKILL.md) | Renders an extracted node/edge graph as Mermaid, with identifier sanitizing, label escaping, and uncertain edges kept visible |
+| [`ocr-extraction-eval`](.cursor/skills/ocr-extraction-eval/SKILL.md) | Scores extraction output against labeled fixtures and gates regressions in CI |
+
+They compose: the parser produces the structured record, the tracker diffs records across time, the converter renders the diagram, and the eval harness proves any of it actually works.
 
 ## Install
 
-Copy the skill into a project:
+```bash
+git clone https://github.com/axelruiz21/whiteboard-skills.git
+cd whiteboard-skills
+./install.sh                              # all skills, personal (~/.cursor/skills)
+./install.sh --project ~/code/my-app      # all skills into a project
+./install.sh --list                       # show available skills
+./install.sh diagram-to-mermaid           # install just one
+```
+
+Personal skills are available in every project; project skills live in the repository and are shared with anyone who clones it. Re-running the installer refuses to overwrite an existing skill unless you pass `--force`.
+
+## Included scripts
+
+Both bundled scripts are standard library only, so no virtual environment is needed to run them:
 
 ```bash
-mkdir -p .cursor/skills
-cp -R /path/to/this-repo/.cursor/skills/python-whiteboard-parser .cursor/skills/
+python3 .cursor/skills/ocr-extraction-eval/scripts/score.py \
+  --truth .cursor/skills/ocr-extraction-eval/scripts/example/truth.json \
+  --pred  .cursor/skills/ocr-extraction-eval/scripts/example/prediction.json --ignore-case
+
+python3 .cursor/skills/diagram-to-mermaid/scripts/graph_to_mermaid.py \
+  .cursor/skills/diagram-to-mermaid/scripts/example/graph.json --direction LR
 ```
 
-Or install it as a personal skill:
+The skills that perform image work expect OpenCV, Pillow, and a local Tesseract install in the project they are applied to.
 
-```bash
-mkdir -p ~/.cursor/skills
-cp -R /path/to/this-repo/.cursor/skills/python-whiteboard-parser ~/.cursor/skills/
-```
+## Design stance
 
-In this repository, the skill is located at:
-
-```text
-.cursor/skills/python-whiteboard-parser/
-```
-
-Cursor can automatically apply it when a request mentions whiteboard OCR, photographed notes, meeting-board transcription, or converting whiteboard images into structured data.
-
-## What it emphasizes
-
-- OpenCV preprocessing tailored to glare, perspective, faint strokes, shadows, and colored markers
-- Local OCR through Tesseract with bounded preprocessing and page-segmentation ensembles
-- Layout-aware extraction of text, lists, action items, tables, and diagrams
-- Evidence coordinates, explicit uncertainty, and human-review flags
-- Typed, testable, stateless Python suitable for batch processing or FastAPI workers
+- Local-first OCR; no image leaves the machine by default.
+- Uncertainty is data. Unreadable content is `null` and flagged, never guessed.
+- Every extracted item carries evidence coordinates so a human can check it.
+- Quality claims are backed by fixtures and scores, not by one good demo photo.
 
 ## License
 

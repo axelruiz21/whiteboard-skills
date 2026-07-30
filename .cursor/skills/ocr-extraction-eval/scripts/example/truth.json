@@ -1,0 +1,22 @@
+{
+  "source_id": "board-demo",
+  "text_lines": [
+    {"text": "Sprint 14 planning", "bbox": [40, 30, 300, 34]},
+    {"text": "Ship auth by Friday", "bbox": [40, 90, 340, 30]},
+    {"text": "Migrate cache to Redis", "bbox": [40, 130, 380, 30]}
+  ],
+  "action_items": [
+    {"text": "Ship auth by Friday", "owner": "AR", "due": "2024-03-15"},
+    {"text": "Migrate cache to Redis", "owner": "JL", "due": null}
+  ],
+  "tables": [
+    {"cells": [["Task", "Owner"], ["Auth", "AR"], ["Cache", "JL"]]}
+  ],
+  "diagram": {
+    "edges": [
+      {"source": "Client", "target": "Gateway"},
+      {"source": "Gateway", "target": "Auth Service"}
+    ]
+  },
+  "needs_review": []
+}

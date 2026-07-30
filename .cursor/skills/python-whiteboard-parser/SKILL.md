@@ -1,11 +1,13 @@
 ---
 name: python-whiteboard-parser
-description: Builds and improves local-first Python workflows that extract text, lists, action items, tables, and diagram structure from whiteboard photos. Use when a user mentions whiteboard OCR, photographed notes, marker-board images, meeting-board transcription, or converting whiteboard content into structured JSON, Markdown, or CSV.
+description: Builds and improves local-first Python workflows that extract text, lists, action items, tables, and diagram structure from a whiteboard photo. Use when a user mentions whiteboard OCR, photographed notes, marker-board images, meeting-board transcription, or converting whiteboard content into structured JSON, Markdown, or CSV.
 ---
 
 # Python Whiteboard Parser
 
-Use this skill to turn one or more whiteboard images into traceable structured data. Favor deterministic Python processing and local OCR. Never silently invent unreadable content.
+Use this skill to turn a whiteboard image into traceable structured data. Favor deterministic Python processing and local OCR. Never silently invent unreadable content.
+
+Hand off when the request is not single-image extraction: comparing two photos of the same board belongs to the `board-change-tracker` skill, rendering the extracted graph belongs to `diagram-to-mermaid`, and measuring extraction accuracy belongs to `ocr-extraction-eval`.
 
 ## Default stack
 
@@ -120,7 +122,7 @@ Test at three levels:
 
 1. Unit-test transforms, grouping, candidate reconciliation, and schema validation.
 2. Golden-test representative images with normalized text and geometry tolerances.
-3. Measure character/word error rate, action-item precision/recall, table cell accuracy, diagram edge F1, and review-flag recall.
+3. Measure character/word error rate, action-item precision/recall, table cell accuracy, diagram edge F1, and review-flag recall using the `ocr-extraction-eval` skill.
 
 Do not optimize only for OCR text accuracy. A parser succeeds when it preserves layout, uncertainty, and provenance.
 

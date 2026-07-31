@@ -1,0 +1,59 @@
+{
+  "source": {
+    "id": "sha256:example-board-slice",
+    "width": 4000,
+    "height": 2252
+  },
+  "quality": {"status": "ok", "warnings": []},
+  "sections": [
+    {
+      "id": "section-roof",
+      "title": "Roof",
+      "action_items": [
+        {
+          "text": "Setup new nozzle",
+          "owner": null,
+          "due": "Today",
+          "confidence": 0.75,
+          "needs_review": false
+        },
+        {
+          "text": "Gun #2 DP1 - check drop down",
+          "owner": null,
+          "due": "Today",
+          "confidence": 0.7,
+          "needs_review": true
+        }
+      ],
+      "text_lines": [],
+      "lists": [],
+      "tables": [],
+      "diagram": {"nodes": [], "edges": []},
+      "bbox": [0, 0, 0, 0],
+      "confidence": 0.7,
+      "needs_review": false
+    },
+    {
+      "id": "section-boardwide",
+      "title": "Board-wide",
+      "action_items": [
+        {
+          "text": "PURGE ALL Robots SOS",
+          "owner": null,
+          "due": null,
+          "priority": "SOS",
+          "confidence": 0.92,
+          "needs_review": false
+        }
+      ],
+      "text_lines": [],
+      "lists": [],
+      "tables": [],
+      "diagram": {"nodes": [], "edges": []},
+      "bbox": [0, 0, 0, 0],
+      "confidence": 0.9,
+      "needs_review": false
+    }
+  ],
+  "unresolved": []
+}

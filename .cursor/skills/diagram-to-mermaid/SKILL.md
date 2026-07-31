@@ -5,7 +5,7 @@ description: Converts extracted node and edge graphs into Mermaid flowcharts, Gr
 
 # Diagram to Mermaid
 
-Use this skill to turn a graph that some upstream process already extracted into a renderable diagram. Detecting boxes and arrows in an image belongs to the `python-whiteboard-parser` skill; this skill starts from its `diagram` output.
+Use this skill to turn a graph that some upstream process already extracted into a renderable diagram. Detecting boxes and arrows in an image belongs to the `python-whiteboard-parser` skill; this skill starts from its `diagram` output. Scoring extraction quality belongs to `ocr-extraction-eval`.
 
 ## Input
 

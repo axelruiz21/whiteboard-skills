@@ -7,7 +7,7 @@ description: Builds labeled fixture sets and scores extraction pipelines with ch
 
 Use this skill to make extraction quality measurable. Any preprocessing, OCR, or structuring change must be justified by a score on a fixture set, not by inspecting one image.
 
-This skill scores extraction output. It does not perform extraction. For producing whiteboard output, use the `python-whiteboard-parser` skill.
+This skill scores extraction output. It does not perform extraction. For producing whiteboard output, use the `python-whiteboard-parser` skill. Adapt nested parser JSON with `scripts/adapt_parser_output.py` before scoring.
 
 ## Ground truth format
 
@@ -34,6 +34,17 @@ Predictions use the same shape, so the whiteboard parser output needs a thin ada
 - Record camera, lighting, and board surface for each fixture so failures cluster into fixable groups.
 - Transcribe exactly what is on the board, including misspellings. Do not silently correct the human who wrote it.
 - Mark genuinely illegible content as `null` in truth and add it to `needs_review`, so a parser is not punished for correctly refusing to guess.
+
+## Adapting parser output
+
+Whiteboard-parser JSON is nested under `sections`. Convert it to the eval record shape before scoring:
+
+```bash
+python scripts/adapt_parser_output.py parsed_board.json -o out/pred/board.json
+python scripts/score.py --truth fixtures/dev/truth --pred out/pred --ignore-case
+```
+
+The adapter flattens `text_lines`, `action_items`, `tables`, and `diagram.edges`, copies `source.id` into `source_id`, and collects `needs_review` / `unresolved` entries. Table rows shaped as header-keyed objects are expanded into cell grids.
 
 ## Scoring
 

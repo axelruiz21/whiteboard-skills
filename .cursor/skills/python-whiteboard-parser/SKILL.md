@@ -7,7 +7,28 @@ description: Builds and improves local-first Python workflows that extract text,
 
 Use this skill to turn a whiteboard image into traceable structured data. Favor deterministic Python processing and local OCR. Never silently invent unreadable content.
 
-Hand off when the request is not single-image extraction: comparing two photos of the same board belongs to the `board-change-tracker` skill, rendering the extracted graph belongs to `diagram-to-mermaid`, and measuring extraction accuracy belongs to `ocr-extraction-eval`.
+Hand off when the request is not single-image extraction: comparing two photos of the same board belongs to the `board-change-tracker` skill, rendering the extracted graph belongs to `diagram-to-mermaid`, measuring extraction accuracy belongs to `ocr-extraction-eval`, multi-panel mosaics belong to `multi-shot-board-stitcher`, sticky-note/kanban boards belong to `sticky-note-board-parser`, safe load gates belong to `image-ingest-hardening`, daily ingest/review belongs to `board-daily-workflow`, action-item export belongs to `board-action-exporter`, and FastAPI job serving belongs to `fastapi-cpu-bound-jobs`.
+
+## Package layout
+
+Implement stages under `python/whiteboard_parser/` (see [REFERENCE.md](REFERENCE.md)):
+
+```text
+python/whiteboard_parser/
+  config.py      # PipelineConfig
+  models.py      # Pydantic / serializable output
+  ingest.py      # calls image-ingest-hardening when available
+  quality.py     # stub
+  rectify.py     # stub
+  ocr.py         # stub adapter
+  pipeline.py    # run_pipeline() ingest-only by default
+```
+
+```bash
+PYTHONPATH=.cursor/skills/python-whiteboard-parser/python python3 -c \
+  "from whiteboard_parser import run_pipeline, PipelineConfig; \
+   print(run_pipeline('fixtures/boards/example.jpg', PipelineConfig()))"
+```
 
 ## Default stack
 
@@ -31,6 +52,7 @@ Use another local OCR engine only as an explicit fallback. Keep OCR engines behi
 2. **Measure image quality**
    - Estimate blur with variance of Laplacian.
    - Detect clipping, glare, low contrast, shadows, and insufficient resolution.
+   - If the long side of the decoded image is under **2000px**, emit a `warning` (or `unusable` when under **1200px**) that the file is likely a chat/Google Photos preview, not a camera original—see [Getting full-res photos into the parser](#getting-full-res-photos-into-the-parser).
    - Return actionable warnings instead of forcing low-confidence extraction.
 
 3. **Rectify the board**
@@ -136,5 +158,46 @@ Do not optimize only for OCR text accuracy. A parser succeeds when it preserves 
 - [ ] Debug overlays can explain extraction
 - [ ] Resource limits and malformed inputs are tested
 - [ ] Output schema and pipeline version are recorded
+
+## Getting full-res photos into the parser
+
+Phone cameras are fine for handwriting OCR. What breaks parsing is the **transfer path**: **Cursor chat attachments are always downscaled** (often to ~1024×576). Google Photos “Share” and Storage saver can also shrink the file. Always parse a file on disk—never attach the image in chat.
+
+### Easy daily loop (recommended)
+
+1. Download/share the **original** to the Mac (Google Photos → Download, USB, or Quick Share) — typically lands in `~/Downloads`.
+2. From the project root, run:
+
+```bash
+./ingest-board
+# or: ./ingest-board ~/Downloads/YOUR_PHOTO.jpg
+# or: drop into fixtures/boards/inbox/ then: ./ingest-board --from-inbox
+```
+
+3. Paste the clipboard prompt into Cursor (already copied), e.g. `Parse the whiteboard photo at @fixtures/boards/….jpg`.
+
+`ingest-board` copies the file into `fixtures/boards/`, rejects chat-sized previews, converts HEIC via `sips` when needed, and copies the `@` prompt to the clipboard.
+
+### Other transfer options
+
+1. USB-C → File transfer / MTP → `DCIM/Camera` (or `DCIM/Samsung`) → drop into `fixtures/boards/inbox/`.
+2. Samsung Quick Share into `fixtures/boards/inbox/`.
+3. Google Photos **Original quality** backup → desktop **Download** (not Share into chat).
+
+### Avoid for OCR
+
+- Attaching or pasting the image in the Cursor chat composer
+- Google Photos Storage saver as the only copy
+- Screenshots of the photo, or messaging “optimized” shares
+
+### Confirm manually
+
+```bash
+python3 .cursor/skills/python-whiteboard-parser/scripts/check_image_resolution.py PATH
+```
+
+Expect roughly `(4000, 2250)` / `(4032, 3024) JPEG`, not `(1024, 576)`.
+
+Capture still matters at full resolution: fill the frame with the board, prefer landscape with edges visible, even lighting, minimal glare.
 
 For implementation details and tuning guidance, read [REFERENCE.md](REFERENCE.md).

@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+# Lean daily standard work: one command for capture → exceptions → export.
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec python3 "$root/.cursor/skills/board-daily-workflow/scripts/run_standard_work.py" "$@"

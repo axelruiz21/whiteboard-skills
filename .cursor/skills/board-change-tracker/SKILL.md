@@ -5,7 +5,7 @@ description: Compares two or more photographs of the same physical whiteboard ta
 
 # Board Change Tracker
 
-Use this skill for the multi-snapshot case: the same board, photographed more than once. Single-image extraction belongs to the `python-whiteboard-parser` skill; this skill consumes that output and adds alignment and differencing.
+Use this skill for the multi-snapshot case: the same board, photographed more than once. Single-image extraction belongs to the `python-whiteboard-parser` skill; this skill consumes that output and adds alignment and differencing. Overlapping panels of one wide board belong to `multi-shot-board-stitcher`. Daily capture process belongs to `board-daily-workflow`.
 
 The hard problem is not detecting pixel differences. It is deciding which pixel differences mean the board changed, because camera position, exposure, glare, and people move between shots while the content does not.
 

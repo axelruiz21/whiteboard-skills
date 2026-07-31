@@ -1,0 +1,6 @@
+#!/usr/bin/env bash
+# One-command: pull newest full-res board photo into fixtures/boards/ and
+# copy a chat-ready "Parse @…" prompt to the clipboard.
+set -euo pipefail
+root="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+exec python3 "$root/.cursor/skills/python-whiteboard-parser/scripts/ingest_board_photo.py" "$@"

@@ -2,23 +2,26 @@
 
 ## Suggested package boundaries
 
+Canonical skeleton lives at `python/whiteboard_parser/` in this skill:
+
 ```text
-whiteboard_parser/
+python/whiteboard_parser/
   config.py
   models.py
-  ingest.py
-  quality.py
-  rectify.py
-  variants.py
-  segment.py
-  ocr.py
-  reconcile.py
-  structure.py
-  render.py
-  pipeline.py
+  ingest.py      # uses image-ingest-hardening when installed beside this skill
+  quality.py     # stub
+  rectify.py     # stub
+  ocr.py         # stub adapter
+  pipeline.py    # run_pipeline() ingest-only by default
 ```
 
-Keep OpenCV arrays internal. Public models should use serializable coordinates, text, confidence, provenance, and review flags.
+Extend with `variants.py`, `segment.py`, `reconcile.py`, `structure.py`, and `render.py` as you implement OCR stages. Keep OpenCV arrays internal. Public models should use serializable coordinates, text, confidence, provenance, and review flags.
+
+```bash
+PYTHONPATH=.cursor/skills/python-whiteboard-parser/python \
+  python3 -c "from whiteboard_parser import run_pipeline, PipelineConfig; print(run_pipeline('PATH.jpg'))"
+```
+
 
 ## Preprocessing guidance
 
@@ -93,6 +96,21 @@ Tune thresholds on the target camera and board conditions. Useful signals includ
 - board-corner confidence
 - OCR agreement rate
 - unresolved-region ratio
+- decoded pixel dimensions (catch chat/Photos compression before OCR)
+
+### Resolution / transfer compression
+
+Phone whiteboard photos are usually **≥2000px** on the long side (12MP phone stills are often ~4000×3000). Chat attachments and Google Photos share exports frequently arrive as **~1024×576**.
+
+In `quality.py` (and the bundled `scripts/check_image_resolution.py`):
+
+| Decoded size | `quality.status` | Warning text (actionable) |
+|---|---|---|
+| Long side **≥ 2000px** | `ok` (for resolution) | none from this gate |
+| Long side **1200–1999px** | `warning` | Image is below 2000px; likely compressed by chat or Google Photos. Copy the camera original to the project via USB/Quick Share/Photos original download and parse that path—do not re-attach in chat. |
+| Long side **&lt; 1200px** | `unusable` | Image is far below camera resolution (often a 1024-wide preview). Refuse confident OCR; ask for the full-resolution file on disk. See SKILL.md “Getting full-res photos into the parser”. |
+
+Measure **decoded** width/height after EXIF orientation, not the filename or claimed MIME type (chat previews are sometimes named `.png` but are JPEG).
 
 An unusable image should produce a valid result with quality diagnostics and no fabricated sections.
 
